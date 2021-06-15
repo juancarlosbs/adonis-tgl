@@ -22,10 +22,10 @@ Route.get('users/:id', 'UserController.show')
 Route.put('users/:id',  'UserController.update')
 Route.delete('users/:id', 'UserController.destroy')
 
-Route.resource('game', 'GameController').apiOnly()
+Route.resource('games', 'GameController').apiOnly()
 
-Route.post('sessions', 'SessionController.store')
+Route.post('sessions', 'SessionController.store').validator('Session')
 
 Route.group(() => {
-  Route.resource('bet', 'BetController').apiOnly()
+  Route.resource('bets', 'BetController').apiOnly().validator(new Map([[['bets.store'], ['Bet']]]))
 }).middleware(['auth'])
