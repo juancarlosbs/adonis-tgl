@@ -22,7 +22,7 @@ Route.get('users/:id', 'UserController.show')
 Route.put('users/:id',  'UserController.update')
 Route.delete('users/:id', 'UserController.destroy')
 
-Route.resource('games', 'GameController').apiOnly()
+Route.resource('games', 'GameController').apiOnly().validator(new Map([[['games.store'], ['Game']]]))
 
 Route.post('passwords', 'ForgotPasswordController.store').validator('ForgotPassword')
 Route.put('passwords', 'ForgotPasswordController.update').validator('ResetPassword')
