@@ -20,7 +20,20 @@ class ForgotPasswordController {
     
             await user.save()
 
-            Kue.dispatch(Job.key, {email, token}, {attempts: 3})
+            await Mail.send(
+                ['emails.forgot_password'],
+                { 
+                    email,
+                    token,
+                    link: `${request.input('redirect_url')}?token=${token}`
+                },
+                message => {
+                    message
+                        .to(email)
+                        .from('juan.cbserrano@gmail.com', 'Juan | TGL')
+                        .subject('Recuperação de senha')
+                }
+            )
         } catch (err) {
             return response
             .status(err.status)

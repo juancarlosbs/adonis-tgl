@@ -1,7 +1,7 @@
 'use strict'
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @type def {import('@adonisjs/framework/src/Response')} Response */
+/** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const Bet = use('App/Models/Bet')
@@ -24,9 +24,8 @@ class BetController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
-    const { page } = request.get()
     
-    const bets = await Bet.query().with('user').paginate(page)
+    const bets = await Bet.query().with('user').fetch()
 
     return bets
   }
@@ -39,15 +38,41 @@ class BetController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response, auth }) {
+
+  async store ({ request, auth }) {
+    const data = request.only(['numbers', 'price', 'game_id'])
+    const bet = await Bet.create({...data, user_id: auth.user.id})
+
+    await Mail.send(
+        ['emails.new_bet'],
+        { 
+        },
+        message => {
+            message
+                .to(auth.user.email)
+                .from('juan.cbserrano@gmail.com', 'Juan | TGL')
+                .subject('Nova Aposta')
+        }
+    )
+
+    return bet
+  }
+  /*async store ({ request, auth }) {
     try {
       const data = request.only(['numbers', 'price'])
-
+      console.log(auth.user.id)
       const bet = await Bet.create({...data, user_id: auth.user.id})
-
-      const email = auth.user.id
-
-      Kue.dispatch(Job.key, {email}, {attempts: 3})
+      await Mail.send(
+        ['emails.new_bet'],
+        { 
+        },
+            message => {
+                message
+                    .to(auth.user.email)
+                    .from('juan.cbserrano@gmail.com', 'Juan | TGL')
+                    .subject('Nova Aposta')
+            }
+        )
   
       return bet
     } catch (err) {
@@ -55,6 +80,7 @@ class BetController {
     }
 
   }
+  */
 
   /**
    * Display a single bet.

@@ -23,7 +23,7 @@ class NewBetMail {
       },
           message => {
               message
-                  .to(auth.user.email)
+                  .to(email)
                   .from('juan.cbserrano@gmail.com', 'Juan | TGL')
                   .subject('Nova Aposta')
           }
