@@ -24,6 +24,9 @@ Route.delete('users/:id', 'UserController.destroy')
 
 Route.resource('games', 'GameController').apiOnly()
 
+Route.post('passwords', 'ForgotPasswordController.store').validator('ForgotPassword')
+Route.put('passwords', 'ForgotPasswordController.update').validator('ResetPassword')
+
 Route.post('sessions', 'SessionController.store').validator('Session')
 
 Route.group(() => {

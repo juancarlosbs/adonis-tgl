@@ -1,10 +1,14 @@
 'use strict'
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
+/** @type def {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const Bet = use('App/Models/Bet')
+const Mail = use('Mail')
+const Kue = use('Kue')
+const Job = use('App/Jobs/NewBetMail')
+
 
 /**
  * Resourceful controller for interacting with bets
@@ -35,12 +39,21 @@ class BetController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, auth }) {
-    const data = request.only(['numbers', 'price'])
+  async store ({ request, response, auth }) {
+    try {
+      const data = request.only(['numbers', 'price'])
 
-    const bet = await Bet.create({...data, user_id: auth.user.id})
+      const bet = await Bet.create({...data, user_id: auth.user.id})
 
-    return bet
+      const email = auth.user.id
+
+      Kue.dispatch(Job.key, {email}, {attempts: 3})
+  
+      return bet
+    } catch (err) {
+      return response.status(err.status).send({ message: 'Algo não deu certo, tivemos um problema interno.'})
+    }
+
   }
 
   /**

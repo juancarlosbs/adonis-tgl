@@ -1,6 +1,9 @@
 'use strict'
 
 const User = use('App/Models/User')
+const Mail = use('Mail')
+const Kue = use('Kue')
+const Job = use('App/Jobs/NewUserMail')
 
 class UserController {
     async index({}) {
@@ -10,11 +13,21 @@ class UserController {
     }
 
     async store({request}) {
-        const data = request.only(['username', 'email', 'password'])
+        try {
+            const data = request.only(['username', 'email', 'password'])
 
-        const user = await User.create(data)
+            const user = await User.create(data)
 
-        return user
+            const email = data.email
+
+            Kue.dispatch(Job.key, {email}, {attempts: 3})
+    
+            return user
+        } catch (err) {
+            return response
+            .status(err.status)
+            .send({ message: 'Algo não deu certo, tivemos um problema interno.'})
+        }
     }
 
     async show({ params }) {
