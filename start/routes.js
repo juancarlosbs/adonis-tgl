@@ -30,5 +30,6 @@ Route.put('passwords', 'ForgotPasswordController.update').validator('ResetPasswo
 Route.post('sessions', 'SessionController.store').validator('Session')
 
 Route.group(() => {
+  Route.put('users/:id',  'UserController.update')
   Route.resource('bets', 'BetController').apiOnly().validator(new Map([[['bets.store'], ['Bet']]]))
 }).middleware(['auth'])

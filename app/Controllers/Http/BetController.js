@@ -27,7 +27,10 @@ class BetController {
     
     const bets = await Bet.query().with('game').fetch()
 
-    return bets
+    const filteredBets = bets.rows.filter(key => key.user_id === auth.user.id)
+
+    const user_id = auth.user.id
+    return {filteredBets, user_id}
   }
 
   /**
