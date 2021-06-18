@@ -20,7 +20,18 @@ class UserController {
 
             const email = data.email
 
-            Kue.dispatch(Job.key, {email}, {attempts: 3})
+            await Mail.send(
+                ['emails.new_user'],
+                { 
+                    email,
+                },
+                message => {
+                    message
+                        .to(user.email)
+                        .from('juan.cbserrano@gmail.com', 'Juan | TGL')
+                        .subject('Conta Criada')
+                }
+            )
     
             return user
         } catch (err) {
@@ -51,7 +62,7 @@ class UserController {
         const user = await User.findOrFail(params.id)
     
         await user.delete()
-      }
+    }
 }
 
 module.exports = UserController

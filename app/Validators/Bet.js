@@ -7,9 +7,7 @@ class Bet {
   
   get rules () {
     return {
-      numbers: 'required',
-      price: 'required',
-      game_id: 'required'
+      cart: 'required'
     }
   }
 }

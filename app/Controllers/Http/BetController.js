@@ -23,9 +23,9 @@ class BetController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index ({ request, auth }) {
     
-    const bets = await Bet.query().with('user').fetch()
+    const bets = await Bet.query().with('game').fetch()
 
     return bets
   }
@@ -40,8 +40,12 @@ class BetController {
    */
 
   async store ({ request, auth }) {
-    const data = request.only(['numbers', 'price', 'game_id'])
-    const bet = await Bet.create({...data, user_id: auth.user.id})
+    const dataReq = request.all()
+    const data = dataReq.cart
+    
+    data.map(async betitem => {
+      await Bet.create({...betitem, user_id: auth.user.id})
+    })
 
     await Mail.send(
         ['emails.new_bet'],
@@ -51,11 +55,9 @@ class BetController {
             message
                 .to(auth.user.email)
                 .from('juan.cbserrano@gmail.com', 'Juan | TGL')
-                .subject('Nova Aposta')
+                .subject('Novas Apostas')
         }
     )
-
-    return bet
   }
   /*async store ({ request, auth }) {
     try {
@@ -95,6 +97,7 @@ class BetController {
     const bet = await Bet.findOrFail(params.id)
 
     await bet.load('user')
+    await bet.load('game')
 
     return bet
   }
